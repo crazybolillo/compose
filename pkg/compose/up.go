@@ -95,6 +95,7 @@ func (s *composeService) Up(ctx context.Context, project *types.Project, options
 			if err != nil {
 				logrus.Warn("could not start menu, an error occurred while starting.")
 			} else {
+				defer keyboard.Close() //nolint:errcheck
 				isWatchConfigured := s.shouldWatch(project)
 				isDockerDesktopActive := s.isDesktopIntegrationActive()
 				isDockerDesktopComposeUI := s.isDesktopUIEnabled()
@@ -166,7 +167,7 @@ func (s *composeService) Up(ctx context.Context, project *types.Project, options
 		})
 	}
 
-	// We use the parent context without cancelation as we manage sigterm to stop the stack
+	// We use the parent context without cancellation as we manage sigterm to stop the stack
 	err = s.start(context.WithoutCancel(ctx), project.Name, options.Start, printer.HandleEvent)
 	if err != nil && !isTerminated.Load() { // Ignore error if the process is terminated
 		return err
